@@ -57,3 +57,15 @@ La aplicación no lee, envía ni modifica correo real. Añadir un buzón en ajus
 Las políticas y flujos de auth siguen la documentación oficial: https://supabase.com/docs/guides/database/postgres/row-level-security y https://supabase.com/docs/reference/javascript/auth-onauthstatechange .
 
 Las pruebas SQL de `supabase/tests/companies.sql` verifican aislamiento entre empresas, aceptación por el correo correcto, uso único de invitaciones, acceso compartido, impedimento de escalada de rol, asignaciones a miembros y conflictos de revisión. Se ejecutan en una transacción que revierte los datos de prueba.
+
+
+## Proyectos con múltiples trabajos y pagadores
+
+- Cada trabajo guarda unidad/estructura/local, servicio, cliente fiscal, acuerdo comercial y ejecución. Un proyecto puede tener varios pagadores; cada solicitud y documento agrupa solo trabajos de uno de ellos.
+- Los trabajos nuevos requieren presupuesto aceptado o referencia de acuerdo previo para facturar. La ejecución se confirma con autor y fecha; se admite cobro previo explícito con motivo. Los trabajos anteriores conservan su comportamiento para no bloquear la migración.
+- En **Trabajos y cobros** se seleccionan líneas para emitir juntas o separadas. Si están completos pagador y código, el editor abre directamente la revisión. Se guardan método y plazo de pago por proyecto y documento, con vencimiento editable.
+- Las solicitudes conservan una copia de los datos fiscales. La tabla Por trabajos distingue ejecución, facturación y cobro. Los cobros parciales se reparten proporcionalmente entre líneas; no son asignaciones bancarias individuales. No hay conciliación bancaria automática.
+- Configuración permite varios tipos de proyecto y etapas; los proyectos continuos permanecen abiertos en la última etapa. Reordenar etapas conserva el significado actual; una etapa ocupada no se elimina ni renombra sin mover sus proyectos antes.
+- Las plantillas técnicas generan borradores de texto por trabajo con variables. La confirmación humana produce un PDF, lo vincula a los documentos del proyecto y registra ejecución. No se aplican firma electrónica, validación técnica automática ni maquetación DOCX.
+- Presupuestos, facturas y documentos técnicos pueden abrir un borrador de correo con PDF y proyecto vinculados. Outlook/Gmail siguen pendientes: no hay envíos reales. Los adjuntos de conversaciones vinculadas se reúnen con los documentos manuales en la ficha.
+- Los nuevos campos se guardan en el payload compartido de empresa, bajo las políticas existentes de Supabase. Esta versión no necesita migración SQL adicional.
