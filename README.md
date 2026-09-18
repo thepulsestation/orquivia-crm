@@ -32,7 +32,9 @@ Aplicación de correo y negocios con interfaz en español, frontend estático pa
 - Trabajos con cantidades, precios e impuestos; solicitudes internas para uno o varios trabajos.
 - El responsable del proyecto o administración puede preparar un presupuesto. Los borradores permiten editar importes y asignar revisor; después pasan a revisión, aprobación y aceptación del cliente. La factura puede solicitarse desde el presupuesto aceptado conservando los importes negociados.
 - Series y números, copias de datos fiscales por documento, PDF descargable y adjuntos PDF privados. Cobros parciales, saldo pendiente y vencimientos calculados.
-- El módulo utiliza el mismo almacenamiento privado por usuario. Los responsables y revisores son datos del flujo, todavía no roles de autorización ni avisos entre cuentas distintas. No hay envío de documentos, automatización mensual, contabilidad oficial ni integración fiscal. Las facturas generadas se identifican como control interno.
+- El módulo comparte los datos entre miembros de una empresa. Las solicitudes guardan el identificador del destinatario y tienen filtro «Asignadas a mí». Los roles propietario, administración y proyectos están registrados; todos ven los mismos módulos por ahora. Solo propiedad y administración gestionan invitaciones. No hay envío de documentos, automatización mensual, contabilidad oficial ni integración fiscal. Las facturas generadas se identifican como control interno.
+
+El editor de documentos tiene tres pasos (cliente, servicios/IVA, revisión/destinatario), clientes fiscales reutilizables y catálogo. La tabla por trabajos busca por servicio, código, categoría y proyecto. Las invitaciones son enlaces personales de 7 días, almacenados mediante hash, sujetos al correo confirmado del destinatario y revocables. No se envían invitaciones por email automáticamente.
 
 Las pruebas de `tests/billing.test.js` cubren cálculos, duplicados, períodos, numeración, instantáneas, revisión de presupuestos, cobros parciales y seguridad del CSV.
 
@@ -40,7 +42,7 @@ Las pruebas de `tests/billing.test.js` cubren cálculos, duplicados, períodos, 
 
 Proyecto Supabase: `ugtuhukjfdvonabqqttd` (Orquivia CRM). Repositorio: https://github.com/thepulsestation/orquivia-crm . Configuración pública en `config.js`; no contiene secretos de servicio ni tokens de correo.
 
-Migraciones en `supabase/migrations`. El MVP guarda un documento de espacio por usuario en `crm_workspaces`, protegido por RLS, con una revisión para impedir sobrescrituras entre sesiones. No es todavía un espacio multiusuario compartido; alternar buzones no cambia el usuario autenticado ni otorga permisos a otras personas. Los documentos reales se guardan en el bucket privado `crm-documents`, aislados por carpeta de usuario, límite 10 MB. Los de prueba se conservan en IndexedDB del dispositivo.
+Migraciones en `supabase/migrations`. La versión actual guarda un documento por empresa en `crm_companies`, con miembros en `crm_members` y RLS. Al acceder, los antiguos espacios personales de `crm_workspaces` se copian a la empresa del propietario sin borrar los originales. La revisión impide sobrescrituras entre sesiones. Los nuevos documentos reales se guardan en el bucket privado `crm-documents`, bajo `company/<company-id>/`, límite 10 MB. Los archivos antiguos conservan su acceso privado original y no se comparten automáticamente. Los de prueba se conservan en IndexedDB del dispositivo.
 
 Configurar en Supabase Auth la Site URL y Redirect URLs de GitHub Pages y, si procede, localhost. Confirmación de correo permanece activada. No se crean contraseñas ni usuarios reales automáticamente.
 
@@ -53,3 +55,5 @@ El workflow publica `dist` en GitHub Pages después de instalar, probar y compil
 La aplicación no lee, envía ni modifica correo real. Añadir un buzón en ajustes NO autoriza acceso a su proveedor. Faltan el registro OAuth en Microsoft Entra y/o Google Cloud, consentimiento del titular, intercambio y renovación de tokens en backend, sincronización con Graph/Gmail, adjuntos del proveedor, reintentos y envío idempotente. Los botones de envío real permanecen deshabilitados. No se debe marcar un buzón conectado ni habilitar envíos hasta verificar esa integración.
 
 Las políticas y flujos de auth siguen la documentación oficial: https://supabase.com/docs/guides/database/postgres/row-level-security y https://supabase.com/docs/reference/javascript/auth-onauthstatechange .
+
+Las pruebas SQL de `supabase/tests/companies.sql` verifican aislamiento entre empresas, aceptación por el correo correcto, uso único de invitaciones, acceso compartido, impedimento de escalada de rol, asignaciones a miembros y conflictos de revisión. Se ejecutan en una transacción que revierte los datos de prueba.
