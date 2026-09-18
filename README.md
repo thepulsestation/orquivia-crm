@@ -25,7 +25,18 @@ Aplicación de correo y negocios con interfaz en español, frontend estático pa
 - Firmas por buzón, densidad del listado y preferencias tipográficas.
 - Dashboards derivados de los negocios y sus checklists reales.
 
-## Infraestructura
+## Administración y cobros
+
+- Tabla global con búsqueda, filtros, ordenación y edición de código, responsable, modalidad y próxima fecha; exportación CSV compatible con Excel.
+- Reglas generales y ajustes por proyecto: inicio, hitos, final o mensual. Los períodos mensuales se solicitan manualmente y se comprueban duplicados por trabajo y período.
+- Trabajos con cantidades, precios e impuestos; solicitudes internas para uno o varios trabajos.
+- El responsable del proyecto o administración puede preparar un presupuesto. Los borradores permiten editar importes y asignar revisor; después pasan a revisión, aprobación y aceptación del cliente. La factura puede solicitarse desde el presupuesto aceptado conservando los importes negociados.
+- Series y números, copias de datos fiscales por documento, PDF descargable y adjuntos PDF privados. Cobros parciales, saldo pendiente y vencimientos calculados.
+- El módulo utiliza el mismo almacenamiento privado por usuario. Los responsables y revisores son datos del flujo, todavía no roles de autorización ni avisos entre cuentas distintas. No hay envío de documentos, automatización mensual, contabilidad oficial ni integración fiscal. Las facturas generadas se identifican como control interno.
+
+Las pruebas de `tests/billing.test.js` cubren cálculos, duplicados, períodos, numeración, instantáneas, revisión de presupuestos, cobros parciales y seguridad del CSV.
+
+## Infraestructura de datos
 
 Proyecto Supabase: `ugtuhukjfdvonabqqttd` (Orquivia CRM). Repositorio: https://github.com/thepulsestation/orquivia-crm . Configuración pública en `config.js`; no contiene secretos de servicio ni tokens de correo.
 
